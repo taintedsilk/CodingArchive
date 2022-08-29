@@ -54,7 +54,8 @@ typedef map<ll, ll> llmap;
 #define MAXN 21
 ll n, m;
 str arr[50];
-ll steps[50][50][4];
+ll steps[50][50];
+bl check[50][50] = {0};
 int dx[] = {-1, 0, 0, 1};
 int dy[] = {0, 1, -1, 0};
 bl inside(ll x, ll y) {
@@ -62,12 +63,12 @@ bl inside(ll x, ll y) {
 }
 struct S
 {
-    int step;
-    int dir;
-    int x;
-    int y;
+    ll step;
+    ll dir;
+    ll x;
+    ll y;
 
-    S(int n1, int n2, int n3, int n4) : step(n1),x(n2), y(n3), dir(n4)
+    S(ll n1, ll n2, ll n3, ll n4) : step(n1),x(n2), y(n3), dir(n4)
     {
     }
 
@@ -82,19 +83,39 @@ ll get_value(ll dir1, ll dir2) {
     else if (dir1 == (3 - dir2)) return 2;
     else return 1;
 }
-void bfs(pair<ll, ll>START, pair<ll, ll>END) {
+void bfs(pair<ll, ll>START) {
     priority_queue<S>q;
     q.push(S(0, START.fi, START.se, 0));
-    steps[START.fi][START.se][0] = 1;
+    steps[START.fi][START.se] = 1;
     while(q.size()) {
         S cur = q.top();
         q.pop();
         f(i, 4) {
             ll x = cur.x + dx[i], y = cur.y + dy[i];
-            if (inside(x, y) && !steps[x][y][cur.dir] && arr[x][y] != '#') {
-                steps[x][y][i] = steps[cur.x][cur.y][cur.dir] + 1 + get_value(cur.dir, i);
+            if (inside(x, y) && !steps[x][y] && arr[x][y] != '#') {
+                steps[x][y] = steps[cur.x][cur.y] + 1 + get_value(cur.dir, i);
                 q.push(S(steps[x][y], x, y, i));
             }
+        }
+    }
+}
+bl extra = 1;
+void dfs(ll i, ll j) {
+    if (!extra || check[i][j]) return;
+    else {
+        vector<pair<ll, ll>>v;
+        f(k, 4) {
+            ll x = i+ dx[k], y = j + dy[k];
+            if (inside(x, y) && steps[x][y] && steps[x][y] < steps[i][j]) {
+                v.push_back({x, y});
+            }
+        }
+        if (v.size() >= 2) extra = 0;
+        else {
+            f(i, v.size()) {
+                dfs(v[i].fi, v[i].se);
+            }
+
         }
     }
 }
@@ -116,30 +137,26 @@ void solve() {
     ll s, e;
     cin >> s >> e;
     f(i, n) cin >> arr[i];
-    pair<ll, ll>S, E;
+    pair<ll, ll> E;
     f(i, n) {
         f(j, m) {
-            if (arr[i][j] == 'S') S = {i, j};
+            if (arr[i][j] == 'S') bfs({i, j});
         }
     }
 
     f(i, n) {
         f(j, m) {
-            if (arr[i][j] == 'T') E = {i, j};
+            if (arr[i][j] == 'T') dfs(i, j)
         }
     }
-    bfs(S, E);
-    f(i, n) {
-        f(j, m) {
-            ll res = LLONG_MAX;
-            f(k, 4) {
-                res = min(stesp[i][j][k], res);
+    ll current = steps[E.fi][E.se];
+    ll res = steps[E.fi][E.se];
+    while (current % 5 != (e - s) % 5) {
+        current += 2;
+        res += 6 + extra;
 
-            }
-            cout << res << " ";
-        }
-        cout << "\n";
     }
+    cout << res;
 
 }
 int main()
