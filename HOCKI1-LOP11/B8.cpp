@@ -1,6 +1,7 @@
 #include <bits/stdc++.h>
 #include <ext/pb_ds/assoc_container.hpp>
 #include <ext/pb_ds/tree_policy.hpp>
+#include <chrono>
 using namespace __gnu_pbds;
 using namespace std;
 
@@ -50,61 +51,65 @@ typedef map<ll, ll> llmap;
 #define itr iterator
 #define BIT(var,pos) ((var) & (1<<(pos)))
 //#define ordered_set tree<pair<ll, ll>, null_type,less<pair<ll, ll>>, rb_tree_tag, tree_order_statistics_node_update>
-ll n, m;
-ll dp[300001];
-bl check[300001];
-vector<vector<ll>>adj(300001);
-ll dfs(ll i, ll parent)
+ll layer[300001];
+ll low[300001];
+
+ll bridges = 0, ap = 0;
+vector<vector<ll>>v(300001);
+void dfs(ll i, ll parent)
 {
-    check[i] = 1;
-    for (auto val : adj[i])
+    layer[i] = low[i] = layer[parent] + 1;
+    ll children = 0;
+    for (auto val : v[i])
     {
-        if (check[val] && val != parent)
+        if (!layer[val])
         {
-            dp[i] += 1;
-            dp[val] -= 1;
+            children++;
+            dfs(val, i);
+            low[i] = min(low[i], low[val]);
         }
-        else if (!check[val])
-            dp[i] += dfs(val, i);
     }
-    return dp[i];
+    if (layer[i] == 1 && children >= 2) ap++;
+    if (layer[i] > 1 && low[i] == layer[i] && children) ap++;
+    for (auto val : v[i]) {
+
+        if (val != parent)
+            low[i] = min(low[i], layer[val]);
+    }
+    if (layer[i] > 1 && low[i] == layer[i]) bridges += 1;
 }
+
+
+
 void solve()
 {
+    ll n, m, a, b;
     cin >> n >> m;
-
     f(i, m)
     {
-        ll a, b;
         cin >> a >> b;
-        adj[a].push_back(b);
-        adj[b].push_back(a);
+        v[a].push_back(b);
+        v[b].push_back(a);
     }
-    dfs(1, 0);
-    ll res = 0;
-    fu(i, 1, n + 1)
-    {
-        if (dp[i] == 0) res += 1;
+    fu(i, 1, n + 1) {
+        if (!layer[i]) dfs(i, 0);
     }
-    fu(i, 1, n + 1) cout << dp[i] << " ";
-    cout << res;
-
-
-
+    cout << ap << " " << bridges;
 
 }
+
 int main()
 {
 
-    //freopen("pushing.INP", "r" ,stdin); freopen("pushing.OUT", "w", stdout);
+    //freopen("SUMC.INP", "r" ,stdin); freopen("SUMC.OUT", "w", stdout);
     //std::ios_base::sync_with_stdio(0);
     //std::cin.tie(0);
     long long test = 1;
 
     //cin >> test;
-    f(i, test)
+    for (int i = 0; i < test; i += 1)
     {
         solve();
-        cout << "\n";
     }
+    return 0;
 }
