@@ -61,22 +61,27 @@ void solve()
     set<vector<ll>>s;
     f(i, n)
     {
-        auto it = s.lower_bound(llv{arr[i], LLONG_MAX, LLONG_MAX});
-        ll val = 0;
+        auto it = s.lower_bound(llv{arr[i], -1, -1});
+        auto it2 = s.lower_bound(llv{arr[i], LLONG_MAX, LLONG_MAX});
+        ll val = -1;
+        if (it2 != s.begin()) val = (*prev(it2))[1];
         if (it == s.begin())
         {
+            if (weight[i] < val) continue;
             val = weight[i];
             s.insert(llv{arr[i], weight[i], 1});
         }
         else
         {
             it = prev(it);
+            if ((*it)[1] + weight[i] < val) continue;
             val = (*it)[1] + weight[i];
             s.insert(llv{arr[i], (*it)[1] + weight[i], (*it)[2] + 1});
             it++;
+            if ((*it)[1] < val) it = s.erase(it);
             it++;
-
         }
+
         while (it != s.end())
         {
 
@@ -84,7 +89,7 @@ void solve()
             else break;
         }
     }
-    cout << (*prev(s.end()))[2] << "\n";
+    cout << (*prev(s.end()))[1];
 }
 int main()
 {
