@@ -72,12 +72,14 @@ ll query(ll l, ll r) {
     return res;
 }
 void update(ll i, ll val) {
-    for (st[i + n] = val; i > 1; i >>= 1) st[i << 1] = min(st[i], st[i ^ 1]);
+    for (st[i += n] = val; i > 1; i >>= 1) st[i>>1] =min(st[i], st[i ^ 1]);
 }
 void solve() {
     cin >> n;
+    fill(next_idx, next_idx + n, 0);
     f(i, n) cin >> a1[i];
     f(i, n) cin >> a2[i];
+
     build();
     ll i = 0, j = 0;
     gp_hash_table<ll, ll>last;
@@ -89,11 +91,11 @@ void solve() {
     }
     while (j < n) {
         if (a1[i] == a2[j]) {
-            i++;j++;
+            i++;
+            while (i < n && st[i + n] == LLONG_MAX) i++;
+            j++;
         }
-        else if (next_idx[a2[j]]) {
-            cout << i << " " << j << " " << next_idx[j] + 1 << "\n";
-            
+        else if (next_idx[j]) {
             if (query(i, next_idx[j] + 1) == a2[j]) {
                 update(next_idx[j], LLONG_MAX);
                 next_idx[j] = next_idx[next_idx[j]];
@@ -112,6 +114,7 @@ void solve() {
         }
 
     }
+    cout << "YES" << "\n";
 
 }
 int main()
@@ -121,7 +124,7 @@ int main()
     std::cin.tie(0);
     long long test = 1;
 
-    //cin >> test;
+    cin >> test;
     for (int i = 0; i < test; i += 1)
     {
         solve();
